@@ -1,0 +1,196 @@
+<!-- Comment Section -->
+<div class="comments-section" id="comments-section" data-profile-id="<%= profile._id %>">
+  
+  <!-- Comment Form -->
+  <div class="comment-form-wrapper">
+    <h3 class="comments-title">What is <%= profile.name %>'s personality type?</h3>
+    
+    <form class="comment-form" id="comment-form">
+      <!-- User Selection -->
+      <div class="form-group user-select-group">
+        <label for="user-select">Commenting as:</label>
+        <select id="user-select" class="form-select" required>
+          <option value="">Select or create user...</option>
+        </select>
+        <button type="button" class="btn-new-user" id="btn-new-user">+ New User</button>
+      </div>
+      
+      <!-- Personality Vote Tags -->
+      <div class="vote-tags">
+        <div class="vote-tag custom-dropdown" id="mbti-vote-tag" data-type="mbti">
+          <span class="vote-label">MBTI</span>
+          <input type="hidden" id="mbti-select" value="">
+          <span class="dropdown-value" id="mbti-display">Select...</span>
+          <div class="dropdown-menu" id="mbti-menu">
+            <div class="dropdown-header">MBTI</div>
+            <div class="dropdown-options">
+              <div class="dropdown-option" data-value="INFP">INFP</div>
+              <div class="dropdown-option" data-value="INFJ">INFJ</div>
+              <div class="dropdown-option" data-value="ENFP">ENFP</div>
+              <div class="dropdown-option" data-value="ENFJ">ENFJ</div>
+              <div class="dropdown-option" data-value="INTJ">INTJ</div>
+              <div class="dropdown-option" data-value="INTP">INTP</div>
+              <div class="dropdown-option" data-value="ENTP">ENTP</div>
+              <div class="dropdown-option" data-value="ENTJ">ENTJ</div>
+              <div class="dropdown-option" data-value="ISFP">ISFP</div>
+              <div class="dropdown-option" data-value="ISFJ">ISFJ</div>
+              <div class="dropdown-option" data-value="ESFP">ESFP</div>
+              <div class="dropdown-option" data-value="ESFJ">ESFJ</div>
+              <div class="dropdown-option" data-value="ISTP">ISTP</div>
+              <div class="dropdown-option" data-value="ISTJ">ISTJ</div>
+              <div class="dropdown-option" data-value="ESTP">ESTP</div>
+              <div class="dropdown-option" data-value="ESTJ">ESTJ</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="vote-tag custom-dropdown" id="enneagram-vote-tag" data-type="enneagram">
+          <span class="vote-label">Enneagram</span>
+          <input type="hidden" id="enneagram-select" value="">
+          <span class="dropdown-value" id="enneagram-display">Select...</span>
+          <div class="dropdown-menu" id="enneagram-menu">
+            <div class="dropdown-header">Enneagram</div>
+            <div class="dropdown-options">
+              <div class="dropdown-option" data-value="1w2">1 <span class="wing-icon">🪽</span> 2</div>
+              <div class="dropdown-option" data-value="2w1">2 <span class="wing-icon flip">🪽</span> 1</div>
+              <div class="dropdown-option" data-value="2w3">2 <span class="wing-icon">🪽</span> 3</div>
+              <div class="dropdown-option" data-value="3w4">3 <span class="wing-icon">🪽</span> 4</div>
+              <div class="dropdown-option" data-value="4w3">4 <span class="wing-icon flip">🪽</span> 3</div>
+              <div class="dropdown-option" data-value="4w5">4 <span class="wing-icon">🪽</span> 5</div>
+              <div class="dropdown-option" data-value="5w4">5 <span class="wing-icon flip">🪽</span> 4</div>
+              <div class="dropdown-option" data-value="5w6">5 <span class="wing-icon">🪽</span> 6</div>
+              <div class="dropdown-option" data-value="6w5">6 <span class="wing-icon flip">🪽</span> 5</div>
+              <div class="dropdown-option" data-value="6w7">6 <span class="wing-icon">🪽</span> 7</div>
+              <div class="dropdown-option" data-value="7w6">7 <span class="wing-icon flip">🪽</span> 6</div>
+              <div class="dropdown-option" data-value="7w8">7 <span class="wing-icon">🪽</span> 8</div>
+              <div class="dropdown-option" data-value="8w7">8 <span class="wing-icon flip">🪽</span> 7</div>
+              <div class="dropdown-option" data-value="8w9">8 <span class="wing-icon">🪽</span> 9</div>
+              <div class="dropdown-option" data-value="9w8">9 <span class="wing-icon flip">🪽</span> 8</div>
+              <div class="dropdown-option" data-value="9w1">9 <span class="wing-icon">🪽</span> 1</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="vote-tag custom-dropdown" id="zodiac-vote-tag" data-type="zodiac">
+          <span class="vote-label">Zodiac</span>
+          <input type="hidden" id="zodiac-select" value="">
+          <span class="dropdown-value" id="zodiac-display">Select...</span>
+          <div class="dropdown-menu" id="zodiac-menu">
+            <div class="dropdown-header zodiac-header">Zodiac</div>
+            <div class="dropdown-options">
+              <div class="dropdown-option" data-value="Aries">Aries</div>
+              <div class="dropdown-option" data-value="Taurus">Taurus</div>
+              <div class="dropdown-option" data-value="Gemini">Gemini</div>
+              <div class="dropdown-option" data-value="Cancer">Cancer</div>
+              <div class="dropdown-option" data-value="Leo">Leo</div>
+              <div class="dropdown-option" data-value="Virgo">Virgo</div>
+              <div class="dropdown-option" data-value="Libra">Libra</div>
+              <div class="dropdown-option" data-value="Scorpio">Scorpio</div>
+              <div class="dropdown-option" data-value="Sagittarius">Sagittarius</div>
+              <div class="dropdown-option" data-value="Capricorn">Capricorn</div>
+              <div class="dropdown-option" data-value="Aquarius">Aquarius</div>
+              <div class="dropdown-option" data-value="Pisces">Pisces</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Title and Content -->
+      <div class="form-group">
+        <input type="text" id="comment-title" class="form-input" placeholder="Title (optional)" maxlength="100">
+      </div>
+      
+      <div class="form-group">
+        <textarea id="comment-content" class="form-textarea" placeholder="Share your thoughts..." rows="4" required></textarea>
+      </div>
+      
+      <button type="submit" class="btn-submit" id="btn-submit" disabled>
+        Submit Comment
+      </button>
+    </form>
+  </div>
+  
+  <!-- Comments Header with VOTE/COMMENT Button -->
+  <div class="comments-header">
+    <h3 class="comments-title-main">Comments</h3>
+    <button class="btn-vote-comment" id="btn-vote-comment">VOTE/COMMENT</button>
+  </div>
+  
+  <!-- Filter Tabs (Horizontal) -->
+  <div class="filter-tabs">
+    <button class="filter-tab active" data-filter="">All</button>
+    <button class="filter-tab" data-filter="mbti">MBTI</button>
+    <button class="filter-tab" data-filter="enneagram">Enneagram</button>
+    <button class="filter-tab" data-filter="zodiac">Zodiac</button>
+  </div>
+  
+  <!-- Sort Buttons -->
+  <div class="sort-buttons">
+    <button class="sort-btn active" data-sort="best">best</button>
+    <button class="sort-btn" data-sort="recent">recent</button>
+  </div>
+  
+  <!-- Comments Count -->
+  <div class="comments-list-header">
+    <div class="comments-count">
+      <span id="comments-count-number">0</span> Comments
+    </div>
+  </div>
+  
+  <!-- Comments List -->
+  <div class="comments-list" id="comments-list">
+    <div class="loading-spinner" id="loading-spinner">Loading comments...</div>
+    <div class="no-comments" id="no-comments" style="display: none;">
+      No comments yet. Be the first to share your thoughts!
+    </div>
+  </div>
+</div>
+
+<!-- Comment Template (hidden, used for cloning) -->
+<template id="comment-template">
+  <div class="comment-card" data-comment-id="">
+    <div class="comment-header">
+      <div class="comment-author">
+        <div class="author-avatar"></div>
+        <span class="author-name"></span>
+      </div>
+      <span class="comment-date"></span>
+    </div>
+    
+    <div class="comment-votes">
+      <span class="vote-badge mbti-badge" style="display: none;"></span>
+      <span class="vote-badge enneagram-badge" style="display: none;"></span>
+      <span class="vote-badge zodiac-badge" style="display: none;"></span>
+    </div>
+    
+    <h4 class="comment-title"></h4>
+    <p class="comment-content"></p>
+    
+    <div class="comment-actions">
+      <button class="like-btn" data-liked="false">
+        <svg class="like-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
+        <span class="like-count">0</span>
+      </button>
+    </div>
+  </div>
+</template>
+
+<!-- New User Modal -->
+<div class="modal" id="new-user-modal" style="display: none;">
+  <div class="modal-backdrop"></div>
+  <div class="modal-content">
+    <h3>Create New User</h3>
+    <form id="new-user-form">
+      <div class="form-group">
+        <label for="new-user-name">Name</label>
+        <input type="text" id="new-user-name" class="form-input" placeholder="Enter your name" required>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" id="btn-cancel-user">Cancel</button>
+        <button type="submit" class="btn-create">Create</button>
+      </div>
+    </form>
+  </div>
+</div>

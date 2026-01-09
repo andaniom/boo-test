@@ -1,0 +1,754 @@
+<style>
+/* ========================================
+   Comment Section Styles
+   Based on Figma Design Specifications
+   ======================================== */
+
+/* Container */
+.comments-section {
+  margin-top: 3em;
+  padding: 2em;
+  background: #fff;
+  border-radius: 25px;
+  box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.15);
+}
+
+.comments-title {
+  font-size: 1.5em;
+  font-weight: 600;
+  margin-bottom: 1.5em;
+  color: #333;
+}
+
+/* Form Wrapper */
+.comment-form-wrapper {
+  margin-bottom: 2em;
+  padding-bottom: 2em;
+  border-bottom: 1px solid #eee;
+}
+
+/* User Selection */
+.user-select-group {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+  flex-wrap: wrap;
+}
+
+.user-select-group label {
+  font-weight: 500;
+  color: #666;
+}
+
+.form-select {
+  padding: 0.6em 1em;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  font-size: 1em;
+  min-width: 200px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-select:focus {
+  border-color: #4edcd8;
+}
+
+.btn-new-user {
+  padding: 0.6em 1.2em;
+  background: transparent;
+  border: 2px solid #4edcd8;
+  color: #4edcd8;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-new-user:hover {
+  background: #4edcd8;
+  color: #fff;
+}
+
+/* Vote Tags - Figma: 30% opacity initially, 100% when selected */
+.vote-tags {
+  display: flex;
+  gap: 0.8em;
+  margin: 1.5em 0;
+  flex-wrap: wrap;
+}
+
+.vote-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4em 0.8em;
+  background: #fff;
+  border: 2px solid #4edcd8;
+  border-radius: 20px;
+  opacity: 0.3;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.vote-tag:hover {
+  opacity: 0.6;
+}
+
+.vote-tag.active,
+.vote-tag.open {
+  opacity: 1;
+  z-index: 10;
+}
+
+/* MBTI vote tag - Cyan outline when active */
+.vote-tag[data-type="mbti"].active {
+  background: #fff;
+  border-color: #4edcd8;
+}
+
+/* Enneagram vote tag - Solid cyan when active */
+.vote-tag[data-type="enneagram"].active {
+  background: #4edcd8;
+  border-color: #4edcd8;
+}
+
+.vote-tag[data-type="enneagram"].active .vote-label,
+.vote-tag[data-type="enneagram"].active .vote-select,
+.vote-tag[data-type="enneagram"].active .dropdown-value {
+  color: #fff;
+}
+
+/* Zodiac vote tag - Dark galaxy when active */
+.vote-tag[data-type="zodiac"].active {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  border-color: #1a1a2e;
+}
+
+.vote-tag[data-type="zodiac"].active .vote-label,
+.vote-tag[data-type="zodiac"].active .vote-select,
+.vote-tag[data-type="zodiac"].active .dropdown-value {
+  color: #fff;
+}
+
+.vote-label {
+  font-weight: 600;
+  color: #4edcd8;
+  font-size: 0.85em;
+  margin-right: 0.3em;
+}
+
+.vote-select {
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-size: 0.85em;
+  color: #4edcd8;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  min-width: 60px;
+}
+
+.vote-select option {
+  color: #333;
+  background: #fff;
+}
+
+/* Custom Dropdown Component */
+.custom-dropdown {
+  position: relative;
+  cursor: pointer;
+}
+
+.dropdown-value {
+  font-weight: 600;
+  color: #4edcd8;
+  font-size: 0.85em;
+  min-width: 60px;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  min-width: 120px;
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  overflow: hidden;
+  margin-top: 5px;
+}
+
+.custom-dropdown.open .dropdown-menu {
+  display: block;
+}
+
+.dropdown-header {
+  background: #4edcd8;
+  color: #fff;
+  padding: 0.6em 1em;
+  font-weight: 600;
+  font-size: 0.9em;
+  text-align: center;
+}
+
+.dropdown-header.zodiac-header {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+}
+
+.dropdown-options {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.dropdown-option {
+  padding: 0.5em 1em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3em;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 0.9em;
+  color: #333;
+}
+
+.dropdown-option:hover {
+  background: rgba(78, 220, 216, 0.1);
+}
+
+.dropdown-option.selected {
+  background: rgba(78, 220, 216, 0.2);
+  font-weight: 600;
+}
+
+/* Wing Icon */
+.wing-icon {
+  display: inline-block;
+  font-size: 0.9em;
+}
+
+.wing-icon.flip {
+  transform: scaleX(-1);
+}
+
+/* Form Inputs */
+.form-group {
+  margin-bottom: 1em;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5em;
+  font-weight: 500;
+  color: #666;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.8em 1em;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 1em;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  border-color: #4edcd8;
+}
+
+.form-textarea {
+  width: 100%;
+  padding: 0.8em 1em;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 1em;
+  outline: none;
+  resize: vertical;
+  min-height: 100px;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.form-textarea:focus {
+  border-color: #4edcd8;
+}
+
+/* Submit Button - Figma: turns blue #4EDCD8 when active */
+.btn-submit {
+  padding: 0.8em 2em;
+  border: none;
+  border-radius: 25px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #ccc;
+  color: #fff;
+}
+
+.btn-submit:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.btn-submit:not(:disabled) {
+  background: #4edcd8;
+  color: #fff;
+}
+
+.btn-submit:not(:disabled):hover {
+  background: #3dbdb9;
+  transform: translateY(-1px);
+}
+
+/* Glow animation after submit - Figma spec */
+.btn-submit.submitted {
+  animation: glowBlue 1s ease;
+}
+
+@keyframes glowBlue {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(78, 220, 216, 0);
+  }
+  50% {
+    box-shadow: 0 0 20px 5px rgba(78, 220, 216, 0.6);
+  }
+}
+
+/* Comments Header - Figma style */
+.comments-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1em;
+}
+
+.comments-title-main {
+  font-size: 1.5em;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.btn-vote-comment {
+  padding: 0.8em 1.5em;
+  background: #4edcd8;
+  color: #fff;
+  border: none;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 0.9em;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-vote-comment:hover {
+  background: #3dbdb9;
+  transform: translateY(-1px);
+}
+
+/* Filter Tabs - Horizontal tabs like Figma */
+.filter-tabs {
+  display: flex;
+  gap: 1.5em;
+  margin-bottom: 1em;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.5em;
+}
+
+.filter-tab {
+  background: none;
+  border: none;
+  padding: 0.5em 0;
+  font-size: 1em;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.filter-tab:hover {
+  color: #4edcd8;
+}
+
+.filter-tab.active {
+  color: #4edcd8;
+  font-weight: 600;
+}
+
+.filter-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -0.5em;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #4edcd8;
+}
+
+/* Sort Buttons - Pill style like Figma */
+.sort-buttons {
+  display: flex;
+  gap: 0.5em;
+  margin-bottom: 1.5em;
+}
+
+.sort-btn {
+  padding: 0.5em 1.2em;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9em;
+  transition: all 0.2s;
+  background: #e5e5e5;
+  color: #666;
+}
+
+.sort-btn.active {
+  background: #4edcd8;
+  color: #fff;
+}
+
+.sort-btn:hover:not(.active) {
+  background: #d5d5d5;
+}
+
+/* Comments List Header */
+.comments-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1em;
+}
+
+.comments-count {
+  font-size: 1em;
+  font-weight: 500;
+  color: #666;
+}
+
+/* Hide old controls (replaced by new tabs/buttons) */
+.comments-controls,
+.sort-controls,
+.filter-controls,
+.filter-select {
+  display: none;
+}
+
+/* Comments List */
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5em;
+}
+
+.loading-spinner {
+  text-align: center;
+  padding: 2em;
+  color: #999;
+}
+
+.no-comments {
+  text-align: center;
+  padding: 2em;
+  color: #999;
+  font-style: italic;
+}
+
+/* Comment Card */
+.comment-card {
+  padding: 1.5em;
+  background: #fafafa;
+  border-radius: 15px;
+  border: 1px solid #eee;
+  transition: border-color 0.3s;
+}
+
+.comment-card:hover {
+  border-color: #ddd;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1em;
+}
+
+.comment-author {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+}
+
+.author-avatar {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #4edcd8, #3dbdb9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.1em;
+}
+
+.author-name {
+  font-weight: 600;
+  color: #333;
+}
+
+.comment-date {
+  font-size: 0.85em;
+  color: #999;
+}
+
+/* Vote Badges */
+.comment-votes {
+  display: flex;
+  gap: 0.5em;
+  margin-bottom: 1em;
+  flex-wrap: wrap;
+}
+
+.vote-badge {
+  padding: 0.4em 1em;
+  border-radius: 20px;
+  font-size: 0.85em;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+}
+
+/* MBTI Badge - Cyan outline, white background */
+.vote-badge.mbti-badge {
+  background: #fff;
+  color: #4edcd8;
+  border: 2px solid #4edcd8;
+}
+
+/* Enneagram Badge - Solid cyan background, white text with wing icon */
+.vote-badge.enneagram-badge {
+  background: #4edcd8;
+  color: #fff;
+  border: none;
+}
+
+.vote-badge.enneagram-badge::before {
+  content: '🪽';
+  font-size: 0.9em;
+}
+
+/* Zodiac Badge - Dark galaxy/stars background */
+.vote-badge.zodiac-badge {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  color: #fff;
+  border: none;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Stars effect for Zodiac */
+.vote-badge.zodiac-badge::before {
+  content: '✦';
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.6em;
+  opacity: 0.7;
+}
+
+.vote-badge.zodiac-badge::after {
+  content: '✦';
+  position: absolute;
+  right: 8px;
+  top: 30%;
+  font-size: 0.5em;
+  opacity: 0.5;
+}
+
+.comment-title {
+  font-size: 1.1em;
+  font-weight: 600;
+  margin-bottom: 0.5em;
+  color: #333;
+}
+
+.comment-content {
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 1em;
+}
+
+/* Like Button - Figma: #4EDCD8 when liked, #6B6A6A when not */
+.comment-actions {
+  display: flex;
+  align-items: center;
+}
+
+.like-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.5em 1em;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #6B6A6A;
+  font-weight: 500;
+  transition: all 0.2s;
+  border-radius: 20px;
+}
+
+.like-btn:hover {
+  background: rgba(107, 106, 106, 0.1);
+}
+
+.like-btn[data-liked="true"] {
+  color: #4edcd8;
+}
+
+.like-btn[data-liked="true"] .like-icon {
+  fill: #4edcd8;
+  stroke: #4edcd8;
+}
+
+.like-btn[data-liked="true"]:hover {
+  background: rgba(78, 220, 216, 0.1);
+}
+
+.like-icon {
+  transition: all 0.2s;
+}
+
+.like-count {
+  font-size: 0.95em;
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  position: relative;
+  background: #fff;
+  padding: 2em;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content h3 {
+  margin-bottom: 1.5em;
+  color: #333;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1em;
+  justify-content: flex-end;
+  margin-top: 1.5em;
+}
+
+.btn-cancel {
+  padding: 0.6em 1.5em;
+  border: 1px solid #ddd;
+  background: transparent;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+  background: #f5f5f5;
+}
+
+.btn-create {
+  padding: 0.6em 1.5em;
+  border: none;
+  background: #4edcd8;
+  color: #fff;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-create:hover {
+  background: #3dbdb9;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .comments-section {
+    padding: 1.5em;
+    margin-top: 2em;
+  }
+  
+  .comments-list-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .comments-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .vote-tags {
+    flex-direction: column;
+  }
+  
+  .vote-tag {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .user-select-group {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .form-select {
+    width: 100%;
+  }
+}
+</style>

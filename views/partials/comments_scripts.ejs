@@ -1,0 +1,533 @@
+<script>
+// ========================================
+// Comment Section JavaScript
+// Handles voting, sorting, filtering, and likes
+// ========================================
+
+(function() {
+  'use strict';
+  
+  const state = {
+    profileId: '',
+    currentUserId: '',
+    currentSort: 'best',
+    currentFilter: '',
+    users: [],
+    comments: []
+  };
+  
+  // Initialize when DOM is ready
+  document.addEventListener('DOMContentLoaded', init);
+  
+  function init() {
+    const section = document.getElementById('comments-section');
+    if (!section) return;
+    
+    state.profileId = section.dataset.profileId;
+    
+    // Load users and comments
+    loadUsers();
+    loadComments();
+    
+    // Setup event listeners
+    setupFormListeners();
+    setupSortListeners();
+    setupFilterListeners();
+    setupModalListeners();
+    setupCustomDropdowns();
+  }
+  
+  // ========================================
+  // API Functions
+  // ========================================
+  
+  async function loadUsers() {
+    try {
+      const response = await fetch('/api/users');
+      state.users = await response.json();
+      renderUserDropdown();
+    } catch (error) {
+      console.error('Failed to load users:', error);
+    }
+  }
+  
+  async function loadComments() {
+    const spinner = document.getElementById('loading-spinner');
+    const noComments = document.getElementById('no-comments');
+    const list = document.getElementById('comments-list');
+    
+    spinner.style.display = 'block';
+    noComments.style.display = 'none';
+    
+    try {
+      let url = `/api/profiles/${state.profileId}/comments?sort=${state.currentSort}`;
+      if (state.currentFilter) {
+        url += `&filter=${state.currentFilter}`;
+      }
+      
+      // Add current user ID to fetch likes status
+      if (state.currentUserId) {
+        url += `&userId=${state.currentUserId}`;
+      }
+      
+      const response = await fetch(url);
+      state.comments = await response.json();
+      
+      spinner.style.display = 'none';
+      renderComments();
+      
+      // Update count
+      document.getElementById('comments-count-number').textContent = state.comments.length;
+      
+      if (state.comments.length === 0) {
+        noComments.style.display = 'block';
+      }
+    } catch (error) {
+      console.error('Failed to load comments:', error);
+      spinner.textContent = 'Failed to load comments';
+    }
+  }
+  
+  async function createUser(name) {
+    try {
+      const response = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name })
+      });
+      
+      if (!response.ok) throw new Error('Failed to create user');
+      
+      const user = await response.json();
+      state.users.unshift(user);
+      state.currentUserId = user._id;
+      renderUserDropdown();
+      
+      return user;
+    } catch (error) {
+      console.error('Failed to create user:', error);
+      alert('Failed to create user. Please try again.');
+    }
+  }
+  
+  async function createComment(data) {
+    try {
+      const response = await fetch(`/api/profiles/${state.profileId}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to create comment');
+      }
+      
+      const comment = await response.json();
+      
+      // Add glow animation to submit button
+      const submitBtn = document.getElementById('btn-submit');
+      submitBtn.classList.add('submitted');
+      setTimeout(() => submitBtn.classList.remove('submitted'), 1000);
+      
+      // Reload comments
+      loadComments();
+      
+      // Reset form
+      resetForm();
+      
+      return comment;
+    } catch (error) {
+      console.error('Failed to create comment:', error);
+      alert(error.message);
+    }
+  }
+  
+  async function toggleLike(commentId, isLiked) {
+    if (!state.currentUserId) {
+      alert('Please select a user first');
+      return;
+    }
+    
+    try {
+      const method = isLiked ? 'DELETE' : 'POST';
+      const response = await fetch(`/api/comments/${commentId}/like`, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: state.currentUserId })
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error);
+      }
+      
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error('Failed to toggle like:', error);
+      // Allow unlike even if already unliked
+    }
+  }
+  
+  // ========================================
+  // Render Functions
+  // ========================================
+  
+  function renderUserDropdown() {
+    const select = document.getElementById('user-select');
+    select.innerHTML = '<option value="">Select or create user...</option>';
+    
+    state.users.forEach(user => {
+      const option = document.createElement('option');
+      option.value = user._id;
+      option.textContent = user.name;
+      if (user._id === state.currentUserId) {
+        option.selected = true;
+      }
+      select.appendChild(option);
+    });
+  }
+  
+  function renderComments() {
+    const list = document.getElementById('comments-list');
+    const template = document.getElementById('comment-template');
+    const spinner = document.getElementById('loading-spinner');
+    const noComments = document.getElementById('no-comments');
+    
+    // Clear existing comments (keep spinner and no-comments)
+    Array.from(list.children).forEach(child => {
+      if (child.id !== 'loading-spinner' && child.id !== 'no-comments') {
+        child.remove();
+      }
+    });
+    
+    state.comments.forEach(comment => {
+      const clone = template.content.cloneNode(true);
+      const card = clone.querySelector('.comment-card');
+      
+      card.dataset.commentId = comment._id;
+      
+      // Author info
+      const authorName = comment.userId?.name || 'Anonymous';
+      card.querySelector('.author-name').textContent = authorName;
+      card.querySelector('.author-avatar').textContent = authorName.charAt(0).toUpperCase();
+      
+      // Date
+      const date = new Date(comment.createdAt);
+      card.querySelector('.comment-date').textContent = formatDate(date);
+      
+      // Votes
+      if (comment.mbtiVote) {
+        const badge = card.querySelector('.mbti-badge');
+        badge.textContent = comment.mbtiVote;
+        badge.style.display = 'inline-block';
+      }
+      if (comment.enneagramVote) {
+        const badge = card.querySelector('.enneagram-badge');
+        badge.textContent = comment.enneagramVote;
+        badge.style.display = 'inline-block';
+      }
+      if (comment.zodiacVote) {
+        const badge = card.querySelector('.zodiac-badge');
+        badge.textContent = comment.zodiacVote;
+        badge.style.display = 'inline-block';
+      }
+      
+      // Title and content
+      const titleEl = card.querySelector('.comment-title');
+      if (comment.title) {
+        titleEl.textContent = comment.title;
+      } else {
+        titleEl.style.display = 'none';
+      }
+      card.querySelector('.comment-content').textContent = comment.content;
+      
+      // Like button
+      const likeBtn = card.querySelector('.like-btn');
+      likeBtn.querySelector('.like-count').textContent = comment.likesCount || 0;
+      
+      // Set initial state based on API response
+      if (comment.isLiked) {
+        likeBtn.dataset.liked = 'true';
+      }
+      
+      likeBtn.addEventListener('click', async () => {
+        const isLiked = likeBtn.dataset.liked === 'true';
+        const result = await toggleLike(comment._id, isLiked);
+        
+        if (result !== undefined) {
+          likeBtn.dataset.liked = isLiked ? 'false' : 'true';
+          likeBtn.querySelector('.like-count').textContent = result.likesCount;
+        }
+      });
+      
+      list.appendChild(clone);
+    });
+  }
+  
+  function formatDate(date) {
+    const now = new Date();
+    const diff = now - date;
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    
+    if (days > 7) {
+      return date.toLocaleDateString();
+    } else if (days > 0) {
+      return `${days}d ago`;
+    } else if (hours > 0) {
+      return `${hours}h ago`;
+    } else if (minutes > 0) {
+      return `${minutes}m ago`;
+    } else {
+      return 'Just now';
+    }
+  }
+  
+  // ========================================
+  // Event Listeners
+  // ========================================
+  
+  function setupFormListeners() {
+    const form = document.getElementById('comment-form');
+    const userSelect = document.getElementById('user-select');
+    const mbtiSelect = document.getElementById('mbti-select');
+    const enneagramSelect = document.getElementById('enneagram-select');
+    const zodiacSelect = document.getElementById('zodiac-select');
+    const titleInput = document.getElementById('comment-title');
+    const contentInput = document.getElementById('comment-content');
+    const submitBtn = document.getElementById('btn-submit');
+    
+    // User selection
+    userSelect.addEventListener('change', (e) => {
+      state.currentUserId = e.target.value;
+      updateSubmitButton();
+      // Reload comments to update like status for the selected user
+      loadComments();
+    });
+    
+    // Vote tag activation - Figma spec: 30% -> 100% opacity on selection
+    [mbtiSelect, enneagramSelect, zodiacSelect].forEach(select => {
+      select.addEventListener('change', (e) => {
+        const tag = e.target.closest('.vote-tag');
+        if (e.target.value) {
+          tag.classList.add('active');
+        } else {
+          tag.classList.remove('active');
+        }
+        updateSubmitButton();
+      });
+    });
+    
+    // Content changes
+    [titleInput, contentInput].forEach(input => {
+      input.addEventListener('input', updateSubmitButton);
+    });
+    
+    // Form submission
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (!state.currentUserId) {
+        alert('Please select a user');
+        return;
+      }
+      
+      const data = {
+        userId: state.currentUserId,
+        title: titleInput.value.trim() || 'Untitled',
+        content: contentInput.value.trim(),
+        mbtiVote: mbtiSelect.value || null,
+        enneagramVote: enneagramSelect.value || null,
+        zodiacVote: zodiacSelect.value || null
+      };
+      
+      if (!data.content) {
+        alert('Please enter a comment');
+        return;
+      }
+      
+      await createComment(data);
+    });
+  }
+  
+  function updateSubmitButton() {
+    const submitBtn = document.getElementById('btn-submit');
+    const contentInput = document.getElementById('comment-content');
+    const titleInput = document.getElementById('comment-title');
+    const mbtiSelect = document.getElementById('mbti-select');
+    const enneagramSelect = document.getElementById('enneagram-select');
+    const zodiacSelect = document.getElementById('zodiac-select');
+    
+    // Enable if: user selected AND (content OR any vote selected)
+    const hasContent = contentInput.value.trim().length > 0 || titleInput.value.trim().length > 0;
+    const hasVote = mbtiSelect.value || enneagramSelect.value || zodiacSelect.value;
+    const hasUser = !!state.currentUserId;
+    
+    submitBtn.disabled = !(hasUser && (hasContent || hasVote));
+  }
+  
+  function resetForm() {
+    document.getElementById('comment-title').value = '';
+    document.getElementById('comment-content').value = '';
+    document.getElementById('mbti-select').value = '';
+    document.getElementById('enneagram-select').value = '';
+    document.getElementById('zodiac-select').value = '';
+    
+    // Reset tag states
+    document.querySelectorAll('.vote-tag').forEach(tag => {
+      tag.classList.remove('active');
+    });
+    
+    updateSubmitButton();
+  }
+  
+  function setupSortListeners() {
+    const sortBtns = document.querySelectorAll('.sort-btn');
+    
+    sortBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        sortBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.currentSort = btn.dataset.sort;
+        loadComments();
+      });
+    });
+  }
+  
+  function setupFilterListeners() {
+    // Filter tabs (new horizontal tabs)
+    const filterTabs = document.querySelectorAll('.filter-tab');
+    
+    filterTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        filterTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        state.currentFilter = tab.dataset.filter;
+        loadComments();
+      });
+    });
+    
+    // VOTE/COMMENT button - scroll to form
+    const voteBtn = document.getElementById('btn-vote-comment');
+    if (voteBtn) {
+      voteBtn.addEventListener('click', () => {
+        const form = document.getElementById('comment-form');
+        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Focus on content textarea
+        setTimeout(() => {
+          document.getElementById('comment-content').focus();
+        }, 500);
+      });
+    }
+  }
+  
+  function setupModalListeners() {
+    const modal = document.getElementById('new-user-modal');
+    const backdrop = modal.querySelector('.modal-backdrop');
+    const btnNewUser = document.getElementById('btn-new-user');
+    const btnCancel = document.getElementById('btn-cancel-user');
+    const form = document.getElementById('new-user-form');
+    const nameInput = document.getElementById('new-user-name');
+    
+    btnNewUser.addEventListener('click', () => {
+      modal.style.display = 'flex';
+      nameInput.focus();
+    });
+    
+    btnCancel.addEventListener('click', () => {
+      modal.style.display = 'none';
+      nameInput.value = '';
+    });
+    
+    backdrop.addEventListener('click', () => {
+      modal.style.display = 'none';
+      nameInput.value = '';
+    });
+    
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = nameInput.value.trim();
+      if (name) {
+        await createUser(name);
+        modal.style.display = 'none';
+        nameInput.value = '';
+      }
+    });
+  }
+  
+  function setupCustomDropdowns() {
+    const dropdowns = document.querySelectorAll('.custom-dropdown');
+    
+    dropdowns.forEach(dropdown => {
+      const type = dropdown.dataset.type;
+      const display = dropdown.querySelector('.dropdown-value');
+      const input = dropdown.querySelector('input[type="hidden"]');
+      const menu = dropdown.querySelector('.dropdown-menu');
+      const options = menu.querySelectorAll('.dropdown-option');
+      
+      // Toggle dropdown on click
+      dropdown.addEventListener('click', (e) => {
+        if (e.target.closest('.dropdown-menu')) return; // Don't toggle if clicking inside menu
+        
+        // Close other dropdowns
+        dropdowns.forEach(d => {
+          if (d !== dropdown) d.classList.remove('open');
+        });
+        
+        dropdown.classList.toggle('open');
+      });
+      
+      // Handle option selection
+      options.forEach(option => {
+        option.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const value = option.dataset.value;
+          
+          // Update hidden input
+          input.value = value;
+          
+          // Update display text
+          if (type === 'enneagram') {
+            const [main, wing] = value.split('w');
+            // Logic for wing flip based on relationship (simplified per previous usage)
+            const flipClass = (main === '2' && wing === '1') || 
+                              (main === '4' && wing === '3') || 
+                              (main === '5' && wing === '4') || 
+                              (main === '6' && wing === '5') || 
+                              (main === '7' && wing === '6') || 
+                              (main === '8' && wing === '7') || 
+                              (main === '9' && wing === '8') ? 'flip' : '';
+            display.innerHTML = `${main} <span class="wing-icon ${flipClass}">🪽</span> ${wing}`;
+          } else {
+            display.textContent = value;
+          }
+          
+          // Mark as selected
+          options.forEach(opt => opt.classList.remove('selected'));
+          option.classList.add('selected');
+          
+          // Activate tag styling
+          dropdown.classList.add('active');
+          
+          // Close dropdown
+          dropdown.classList.remove('open');
+          
+          // Trigger form validation update
+          updateSubmitButton();
+        });
+      });
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.custom-dropdown')) {
+        dropdowns.forEach(d => d.classList.remove('open'));
+      }
+    });
+  }
+})();
+</script>

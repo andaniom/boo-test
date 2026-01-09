@@ -1,0 +1,123 @@
+<%- include('partials/prologue.ejs', {title: `${profile.name} MBTI | Boo Personality Database`, description: `What is ${profile.name}'s MBTI personality type? Find out what ${profile.name}'s Myers Briggs, Enneagram, and Zodiac sign are in the Soulverse, the MBTI personality database of celebrities and fictional characters.`}) %>
+
+                <div class="row sqs-row">
+                  <%- include('partials/categories.ejs') %>
+                  <div class="col sqs-col-10 sqs-col-page">
+                    <div class="sqs-block html-block sqs-block-html" data-block-type="2" id="block-2e6206ba777e9c6841a8">
+                      <div class="sqs-block-content">
+                        <h2 class="name"><%= profile.name %> <span style="color: #4edcd8; font-weight: bold">MBTI</span>
+                        </h2>
+                        <% if (profile.profileTags && profile.profileTags.length > 0) { %>
+                        <div class="profile-tags">
+                          <% profile.profileTags.forEach(function(tag) { %>
+                          <span class="profile-tag"><%= tag %></span>
+                          <% }); %>
+                        </div>
+                        <% } %>
+                      </div>
+                    </div>
+                    <div class="row sqs-row">
+                      <div class="col sqs-col-photo">
+                        <div class="sqs-block image-block sqs-block-image" data-aspect-ratio="136.28691983122363" data-block-type="5" id="block-1f47fbbe7cae8fdeba8c">
+                          <div class="sqs-block-content">
+                            <div class="image-block-outer-wrapper layout-caption-below design-layout-inline combination-animation-site-default individual-animation-site-default individual-text-animation-site-default" data-test="image-block-inline-outer-wrapper">
+                              <noscript>
+                                <img class="picture" src="<%= profile.image %>" alt="<%= profile.image %>" />
+                              </noscript>
+                              <img class="thumb-image picture" data-src="<%= profile.image %>" data-image="<%= profile.image %>" data-image-dimensions="" data-image-focal-point="0.5,0.5" alt="<%= profile.image %>" data-load="false" data-image-id="60ba7def6ab3a1722eeb654b" data-type="image" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col sqs-col-trait">
+                        <div class="row sqs-row">
+                          <div class="col sqs-col-sub-trait">
+                            <div class="trait">
+                              <p class="center" style="height: 25%; line-height: 1">MBTI</p>
+                              <p class="trait-font center" style="height: 40%"><%= profile.mbti %></p>
+                            </div>
+                          </div>
+                          <div class="col sqs-col-sub-trait">
+                            <div class="trait">
+                              <p class="center" style="height: 25%; line-height: 1">Enneagram</p>
+                              <p class="trait-font center" style="height: 40%"><%= (profile.enneagram || '').replace('w', ' 🪽 ') %></p>
+                            </div>
+                          </div>
+                          <div class="col sqs-col-sub-trait">
+                            <div class="trait">
+                              <p class="center" style="height: 25%; line-height: 1">Socionics</p>
+                              <p class="trait-font center" style="height: 40%"><%= profile.socionics %></p>
+                            </div>
+                          </div>
+                          <div class="col sqs-col-sub-trait">
+                            <div class="trait">
+                              <p class="center" style="height: 25%; line-height: 1">Big 5 Sloan</p>
+                              <p class="trait-font center" style="height: 40%"><%= profile.sloan %></p>
+                            </div>
+                          </div>
+                          <div class="col sqs-col-sub-trait">
+                            <div class="trait">
+                              <p class="center" style="height: 25%; line-height: 1">Instinctual Variant</p>
+                              <p class="trait-font center" style="height: 40%"><%= profile.variant %></p>
+                            </div>
+                          </div>
+                          <div class="col sqs-col-sub-trait">
+                            <div class="trait">
+                              <p class="center" style="height: 25%; line-height: 1">Tritype</p>
+                              <p class="trait-font center" style="height: 40%"><%= profile.tritype %></p>
+                            </div>
+                          </div>
+                          <div class="col sqs-col-sub-trait">
+                            <div class="trait">
+                              <p class="center" style="height: 25%; line-height: 1">Attitudinal Psyche</p>
+                              <p class="trait-font center" style="height: 40%"><%= profile.psyche %></p>
+                            </div>
+                          </div>
+                          <div class="col sqs-col-sub-trait">
+                            <div class="trait">
+                              <p class="center" style="height: 25%; line-height: 1">Temperament</p>
+                              <div class="trait-font-special center" style="height: 40%"><%= profile.temperaments %></div>
+                              <!-- <p class="trait-font-special"><%= profile.temperaments %></p> -->
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="sqs-block html-block sqs-block-html" data-block-type="2" id="block-8d8156722d8e328e16b8">
+                      <div class="sqs-block-content">
+                        <p class="" style="white-space:pre-wrap;"><%= profile.description %>
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <!-- Comment Section (inside main content column) -->
+                    <%- include('partials/comments_styles.ejs') %>
+                    <%- include('partials/comments.ejs') %>
+                    <%- include('partials/comments_scripts.ejs') %>
+                    
+                    <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee;">
+                      <h3 style="font-size: 1.5rem; margin-bottom: 20px; color: #333;">Other Profiles</h3>
+                      <div style="display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px; -webkit-overflow-scrolling: touch;">
+                        <% if (locals.profiles) { %>
+                          <% profiles.forEach(function(p) { %>
+                            <a href="/profile/<%= p._id %>" style="text-decoration: none; color: inherit; flex: 0 0 auto;">
+                              <div style="text-align: center; width: 100px; opacity: <%= (profile && p._id.toString() === profile._id.toString()) ? '1' : '0.6' %>; transition: opacity 0.2s;" 
+                                   onmouseover="this.style.opacity='1'" 
+                                   onmouseout="this.style.opacity='<%= (profile && p._id.toString() === profile._id.toString()) ? '1' : '0.6' %>'">
+                                <div style="width: 80px; height: 80px; margin: 0 auto 10px; border-radius: 50%; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                                  <img src="<%= p.image %>" alt="<%= p.name %>" style="width: 100%; height: 100%; object-fit: cover;">
+                                </div>
+                                <div style="font-weight: 600; font-size: 0.9rem; line-height: 1.2;">
+                                  <%= p.name %>
+                                </div>
+                              </div>
+                            </a>
+                          <% }); %>
+                        <% } %>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+<%- include('partials/epilogue.ejs') %>
+
